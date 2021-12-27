@@ -1,3 +1,4 @@
+import ssl
 import boto3
 import re
 import smtplib
@@ -109,11 +110,10 @@ class Email():
             msg['Subject'] = self.msg_subject
             msg['From'] = self.smtp_from
             msg['To'] = ", ".join(recipients)
-            s = smtplib.SMTP("{0}:{1}".format(self.smtp_server_addr, self.smtp_server_port))
+            s = smtplib.SMTP(host=self.smtp_server_addr, port=self.smtp_server_port)
             if self.smtp_server_tls:
-                s.ehlo()
-                s.starttls(tuple())
-                s.ehlo()
+                context=ssl.create_default_context()
+                s.starttls(context=context)
             if (self.smtp_user is not None) and (self.smtp_pass is not None):
                 s.login(self.smtp_user, self.smtp_pass)
             s.sendmail(msg['From'], recipients, msg.as_string())
